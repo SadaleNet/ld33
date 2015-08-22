@@ -43,16 +43,17 @@ public class Button extends GameObject {
 		if(!hover)
 			batch.setColor(0.5f, 0.5f, 0.5f, 1);
 		batch.draw(sprite, x-w/2, y-h/2, w, h,
-			spriteIndex,
+			spriteIndex*64,
 			5*64, 64, 64, false, false);
 		if(!hover)
 			batch.setColor(1, 1, 1, 1);
+		LD33Game.instance.bitmapFont.getData().setScale(0.5f);
 		if(level<costTable.length){
 			LD33Game.instance.bitmapFont.draw(batch,
 				Integer.toString(costTable[level]),
-				x, y-16);
+				x+8, y-8);
 		}else{
-			LD33Game.instance.bitmapFont.draw(batch, "max", x+8, y-12);
+			LD33Game.instance.bitmapFont.draw(batch, "max", x+8, y-8);
 		}
 	}
 }

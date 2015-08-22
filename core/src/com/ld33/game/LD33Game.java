@@ -43,6 +43,8 @@ public class LD33Game extends ApplicationAdapter {
 	int money = 0;
 	float damage = 1f;
 	int averageSpawnDuration = 10000;
+	float bossSpawnProbability = 0.25f;
+	int moneyDelta = 1;
 	long nextVictimSpawnTick;
 
 	public static final int GAME_WIDTH = 960;
@@ -64,8 +66,7 @@ public class LD33Game extends ApplicationAdapter {
 		shapeRenderer = new ShapeRenderer();
 		//img = new Texture("badlogic.jpg");
 		bitmapFont = new BitmapFont(Gdx.files.internal("font.fnt"));
-		bitmapFont.getData().setScale(0.5f);
-		attackButton = new Button(32, GAME_HEIGHT-32-32, 0, new int[]{1, 10, 50}, new Action(){
+		attackButton = new Button(32, GAME_HEIGHT-32-32, 0, new int[]{3, 10, 50}, new Action(){
 			@Override
 			void action(int level) {
 				switch(level){
@@ -76,6 +77,50 @@ public class LD33Game extends ApplicationAdapter {
 			}
 		});
 		objectList.add(attackButton);
+		rateButton = new Button(32, GAME_HEIGHT-32-32-64, 1, new int[]{3, 10, 50}, new Action(){
+			@Override
+			void action(int level) {
+				switch(level){
+					case 1:	bird.poopReloadDuration = 1250; break;
+					case 2:	bird.poopReloadDuration = 500; break;
+					case 3:	bird.poopReloadDuration = 100; break;				
+				}
+			}
+		});
+		objectList.add(rateButton);
+		flySpeedButton = new Button(32, GAME_HEIGHT-32-32-64*2, 2, new int[]{3, 10, 20}, new Action(){
+			@Override
+			void action(int level) {
+				switch(level){
+					case 1:	bird.speed = 150f; break;
+					case 2:	bird.speed = 200f; break;
+					case 3:	bird.speed = 1000f; break;				
+				}
+			}
+		});
+		objectList.add(flySpeedButton);
+		spawnRateButton = new Button(32, GAME_HEIGHT-32-32-64*3, 3, new int[]{10, 50, 200}, new Action(){
+			@Override
+			void action(int level) {
+				switch(level){
+					case 1:	averageSpawnDuration = 5000; bossSpawnProbability=0f; break;
+					case 2:	averageSpawnDuration = 2000; break;
+					case 3:	averageSpawnDuration = 1000; bossSpawnProbability=1f; break;				
+				}
+			}
+		});
+		objectList.add(spawnRateButton);
+		moneyButton = new Button(32, GAME_HEIGHT-32-32-64*4, 4, new int[]{5, 10, 20}, new Action(){
+			@Override
+			void action(int level) {
+				switch(level){
+					case 1:	moneyDelta = 2; break;
+					case 2:	moneyDelta = 3; break;
+					case 3:	moneyDelta = 4; break;				
+				}
+			}
+		});
+		objectList.add(moneyButton);
 
 		ParticleEffect poopEffect = new ParticleEffect();
 		poopEffect.load(Gdx.files.internal("poopDrop.p"), Gdx.files.internal(""));
@@ -161,20 +206,25 @@ public class LD33Game extends ApplicationAdapter {
 		//render sprite
 		for(GameObject i:objectList)
 			i.render(batch, sprite);
-	    LD33Game.instance.bitmapFont.draw(batch, "$"+Integer.toString(money), 0, GAME_HEIGHT-16);
+
+		//render money
+		bitmapFont.getData().setScale(1f);
+	    LD33Game.instance.bitmapFont.draw(batch, "$"+Integer.toString(money), 0, GAME_HEIGHT);
 		batch.end();
 
 		//render HP bar
 		shapeRenderer.begin(ShapeType.Filled);
 		for(GameObject i:objectList){
 			if(i instanceof Victim){
-				if(((Victim)i).hp==3)
+				if(((Victim)i).hp==((Victim)i).getFullHp())
 					continue;
 				shapeRenderer.setColor(Color.RED);
 				shapeRenderer.rect(i.x-i.w/2, i.y+80, i.w, 10);
 
-				shapeRenderer.setColor(Color.GREEN);
-				shapeRenderer.rect(i.x-i.w/2, i.y+80, i.w*((Victim)i).hp/3f, 10);
+				if(((Victim)i).hp>0){
+					shapeRenderer.setColor(Color.GREEN);
+					shapeRenderer.rect(i.x-i.w/2, i.y+80, i.w*((Victim)i).hp/((Victim)i).getFullHp(), 10);
+				}
 			}
 		}
 		shapeRenderer.end();
@@ -187,11 +237,20 @@ public class LD33Game extends ApplicationAdapter {
 
 	private void spawnVictim() {
 		nextVictimSpawnTick = TimeUtils.millis()+(long)(averageSpawnDuration/2+Math.random()*averageSpawnDuration);
-		objectList.add(new Victim(
-			(float)(
-				(Math.random()<0.5?1:-1)
-				*(MIN_VICTIM_SPEED+Math.random()*(MAX_VICTIM_SPEED-MIN_VICTIM_SPEED))
-			)
-		));
+		if(Math.random()<bossSpawnProbability){
+			objectList.add(new Boss(
+					(float)(
+						(Math.random()<0.5?1:-1)
+						*(MIN_VICTIM_SPEED+Math.random()*(MAX_VICTIM_SPEED-MIN_VICTIM_SPEED))
+					)
+				));
+		}else{
+			objectList.add(new Victim(
+				(float)(
+					(Math.random()<0.5?1:-1)
+					*(MIN_VICTIM_SPEED+Math.random()*(MAX_VICTIM_SPEED-MIN_VICTIM_SPEED))
+				)
+			));
+		}
 	}
 }

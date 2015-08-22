@@ -10,10 +10,10 @@ public class Victim extends GameObject {
 	final int GRAPHIC_INTERVAL = 50; //how long does it take to change a frame
 	final int LEFT_BOUND = -64/2;
 	final int RIGHT_BOUND = LD33Game.GAME_WIDTH+64/2;
-	private boolean spriteFlip = false;
+	protected boolean spriteFlip = false;
 	public PooledEffect effect = null;
 
-	public float hp = 3; 
+	public float hp; 
 
 	Victim(float xVel){
 		if(xVel<0){
@@ -25,6 +25,7 @@ public class Victim extends GameObject {
 		this.xVel = xVel;
 		y = 64;
 		w = 64; h = 128;
+		hp = getFullHp();
 	}
 	@Override
 	protected void onStepHook(double deltaTime, int mouseX, int mouseY){
@@ -50,8 +51,12 @@ public class Victim extends GameObject {
 			effect = LD33Game.instance.poopEffectPool.obtain();
 			effect.setPosition(x, y);
 			LD33Game.instance.effects.add(effect);
-			LD33Game.instance.money++;
+			LD33Game.instance.money += LD33Game.instance.moneyDelta;
 			//TODO: create eyes candy for getting money
 		}
+	}
+
+	public float getFullHp() {
+		return 3;
 	}
 }
