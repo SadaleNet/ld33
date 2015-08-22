@@ -32,6 +32,6 @@ public class BlackCloud extends GameObject {
 	@Override
 	public void render(SpriteBatch batch, Texture sprite){
 		batch.draw(sprite, x-w/2, y-h/2, w, h,
-			0*64, 4*64, 64, 64, false, false);
+			0*128, 4*64, 128, 64, false, false);
 	}
 }

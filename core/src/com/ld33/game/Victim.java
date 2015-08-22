@@ -50,7 +50,7 @@ public class Victim extends GameObject {
 			return;
 		hp -= damage;
 		if(hp<=0){
-			effect = LD33Game.instance.poopEffectPool.obtain();
+			effect = LD33Game.instance.poopedEffectPool.obtain();
 			effect.setPosition(x, y);
 			LD33Game.instance.effects.add(effect);
 			LD33Game.instance.money += LD33Game.instance.moneyDelta;
