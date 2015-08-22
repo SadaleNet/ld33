@@ -14,6 +14,12 @@ public class Boss extends Victim {
 			(int)(((TimeUtils.millis()-spawnTime)/GRAPHIC_INTERVAL)%8)*64,
 			6*64, 64, 128, spriteFlip, false);
 	}
+	public void hit(float damage){
+		super.hit(damage);
+		if(hp<=0){
+			//TODO: do the win logic
+		}
+	}
 
 	public float getFullHp() {
 		return 1500; //The max damage dealt on the victim is about 1800

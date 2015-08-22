@@ -34,6 +34,7 @@ public class LD33Game extends ApplicationAdapter {
 	private Camera camera;
 
 	private Bird bird;
+	Boss boss = null;
 	ParticleEffectPool poopEffectPool;
 	ParticleEffectPool poopedEffectPool;
 	Array<PooledEffect> effects = new Array();
@@ -237,8 +238,8 @@ public class LD33Game extends ApplicationAdapter {
 
 	private void spawnVictim() {
 		nextVictimSpawnTick = TimeUtils.millis()+(long)(averageSpawnDuration/2+Math.random()*averageSpawnDuration);
-		if(Math.random()<bossSpawnProbability){
-			objectList.add(new Boss(
+		if(boss==null&&Math.random()<bossSpawnProbability){
+			objectList.add(boss=new Boss(
 					(float)(
 						(Math.random()<0.5?1:-1)
 						*(MIN_VICTIM_SPEED+Math.random()*(MAX_VICTIM_SPEED-MIN_VICTIM_SPEED))

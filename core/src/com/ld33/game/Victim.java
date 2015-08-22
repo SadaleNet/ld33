@@ -31,6 +31,8 @@ public class Victim extends GameObject {
 	protected void onStepHook(double deltaTime, int mouseX, int mouseY){
 		if(x<LEFT_BOUND||x>RIGHT_BOUND){
 			LD33Game.instance.objectList.remove(this);
+			if(this instanceof Boss)
+				LD33Game.instance.boss = null;
 			if(effect!=null)
 				effect.setDuration(0);
 		}
