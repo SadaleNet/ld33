@@ -66,7 +66,7 @@ public class LD33Game extends ApplicationAdapter {
 	private static final float AVERAGE_WHITE_CLOUD_SPAWN_DURATION = 2500;
 	private static final float AVERAGE_BLACK_CLOUD_SPAWN_DURATION = 10000;
 	private static final float MIN_CLOUD_SPEED = 25f;
-	private static final float MAX_CLOUD_SPEED = 200f;
+	private static final float MAX_CLOUD_SPEED = 75f;
 	private static final float AVERAGE_POLICE_SPAWN_DURATION = 100000;
 	private static final float MIN_POLICE_SPEED = 100f;
 	private static final float MAX_POLICE_SPEED = 250f;

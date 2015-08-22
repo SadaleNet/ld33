@@ -19,7 +19,7 @@ public class Cloud extends GameObject {
 	}
 	@Override
 	public void render(SpriteBatch batch, Texture sprite){
-		batch.setColor(1, 1, 1, 0.5f);
+		batch.setColor(1, 1, 1, 0.75f);
 		batch.draw(sprite, x-w/2, y-h/2, w, h,
 			1*128, 4*64, 128, 64, false, false);
 		batch.setColor(1, 1, 1, 1);
