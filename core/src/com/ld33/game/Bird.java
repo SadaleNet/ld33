@@ -28,12 +28,14 @@ public class Bird extends GameObject {
 	}
 	@Override
 	protected void onStepHook(double deltaTime, int mouseX, int mouseY){
-		if(Math.sqrt((mouseX-x)*(mouseX-x)+(mouseY-y)*(mouseY-y))<=STOP_MOVEMENT_DISTANCE
-			||x<LEFT_BOUND||x>RIGHT_BOUND
-			||y<BOTTOM_BOUND||y>TOP_BOUND){
+		if(Math.sqrt((mouseX-x)*(mouseX-x)+(mouseY-y)*(mouseY-y))<=STOP_MOVEMENT_DISTANCE){
 			xVel = 0;
 			yVel = 0;
+		}else if(x<LEFT_BOUND||x>RIGHT_BOUND){
+			xVel = 0;
 			x = Math.max(LEFT_BOUND, Math.min(x, RIGHT_BOUND));
+		}else if(y<BOTTOM_BOUND||y>TOP_BOUND){
+			yVel = 0;
 			y = Math.max(BOTTOM_BOUND, Math.min(y, TOP_BOUND));
 		}else{
 			double angle = Math.atan2(mouseY-y, mouseX-x);
