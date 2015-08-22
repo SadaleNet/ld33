@@ -5,6 +5,7 @@ import java.util.Vector;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -13,13 +14,18 @@ import com.badlogic.gdx.graphics.g2d.ParticleEffect;
 import com.badlogic.gdx.graphics.g2d.ParticleEffectPool;
 import com.badlogic.gdx.graphics.g2d.ParticleEffectPool.PooledEffect;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.TimeUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 public class LD33Game extends ApplicationAdapter {
 	SpriteBatch batch;
+	ShapeRenderer shapeRenderer;
 	Texture img;
 	BitmapFont bitmapFont;
 	Vector<GameObject> objectList = new Vector<GameObject>();
@@ -29,12 +35,19 @@ public class LD33Game extends ApplicationAdapter {
 
 	private Bird bird;
 	ParticleEffectPool poopEffectPool;
+	ParticleEffectPool poopedEffectPool;
 	Array<PooledEffect> effects = new Array();
 
 	float money = 0f;
+	float damage = 1f;
+	int averageSpawnDuration = 10000;
+	long nextVictimSpawnTick;
 
 	public static final int GAME_WIDTH = 960;
 	public static final int GAME_HEIGHT = 500;
+	private static final float MIN_VICTIM_SPEED = 50f;
+	private static final float MAX_VICTIM_SPEED = 100f;
+	
 	public static LD33Game instance;
 
 	@Override
@@ -46,6 +59,7 @@ public class LD33Game extends ApplicationAdapter {
 	    viewport = new FitViewport(GAME_WIDTH, GAME_HEIGHT, camera);
 	    sprite = new Texture("sprite.png");
 		batch = new SpriteBatch();
+		shapeRenderer = new ShapeRenderer();
 		//img = new Texture("badlogic.jpg");
 		bitmapFont = new BitmapFont(Gdx.files.internal("font.fnt"));
 
@@ -53,7 +67,13 @@ public class LD33Game extends ApplicationAdapter {
 		poopEffect.load(Gdx.files.internal("poopDrop.p"), Gdx.files.internal(""));
 		poopEffectPool = new ParticleEffectPool(poopEffect, 8, 128);
 
-		objectList.add(bird=new Bird(100, 100));
+		ParticleEffect poopedEffect = new ParticleEffect();
+		poopedEffect.load(Gdx.files.internal("pooped.p"), Gdx.files.internal(""));
+		poopedEffectPool = new ParticleEffectPool(poopedEffect, 16, 1024);
+
+		objectList.add(bird=new Bird(GAME_WIDTH/2, GAME_HEIGHT/2));
+		
+		spawnVictim();
 	}
 
 	@Override
@@ -68,18 +88,43 @@ public class LD33Game extends ApplicationAdapter {
 		if(Gdx.input.justTouched()){
 			bird.poop();
 		}
+		
+		//spawn items
+		if(TimeUtils.millis()>nextVictimSpawnTick)
+			spawnVictim();
 
 		//update the objects
 		for(GameObject i:objectListClone)
 			i.onStep(deltaTime, (int)touchPos.x, (int)touchPos.y);
 
-		/*TODO: do collision detection here*/
+		//collision detection
+		for(int i=0; i<objectListClone.size(); i++){
+			for(int j=i+1; j<objectListClone.size(); j++){
+				GameObject a = objectListClone.get(i);
+				GameObject b = objectListClone.get(j);
+				if(b instanceof Poop && a instanceof Victim){
+					GameObject c = a;
+					a = b;
+					b = c;
+				}
+				if(a instanceof Poop && b instanceof Victim){
+					if(new Rectangle(b.x, b.y, b.w, b.h).contains(a.x, b.y)){
+						((Victim)b).hit(damage);
+						((Poop)a).effect.setDuration(0);
+						objectList.remove(a);
+					}
+				}
+			}
+		}
 
 		//do the rendering
 		Gdx.gl.glClearColor(1, 1, 1, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+		batch.setProjectionMatrix(camera.combined);
+		shapeRenderer.setProjectionMatrix(camera.combined);
 		batch.begin();
 		//bitmapFont.draw(batch, "meow", 200, 200);
+
 		//rendering particles
 		for (int i = effects.size - 1; i >= 0; i--) {
 		    PooledEffect effect = effects.get(i);
@@ -93,10 +138,35 @@ public class LD33Game extends ApplicationAdapter {
 		for(GameObject i:objectList)
 			i.render(batch, sprite);
 		batch.end();
+
+		//render HP bar
+		shapeRenderer.begin(ShapeType.Filled);
+		for(GameObject i:objectList){
+			if(i instanceof Victim){
+				if(((Victim)i).hp==3)
+					continue;
+				shapeRenderer.setColor(Color.RED);
+				shapeRenderer.rect(i.x-i.w/2, i.y+80, i.w, 10);
+
+				shapeRenderer.setColor(Color.GREEN);
+				shapeRenderer.rect(i.x-i.w/2, i.y+80, i.w*((Victim)i).hp/3f, 10);
+			}
+		}
+		shapeRenderer.end();
 	}
 
 	@Override
 	public void resize(int width, int height) {
 	    viewport.update(width, height);
+	}
+
+	private void spawnVictim() {
+		nextVictimSpawnTick = TimeUtils.millis()+(long)(averageSpawnDuration/2+Math.random()*averageSpawnDuration);
+		objectList.add(new Victim(
+			(float)(
+				(Math.random()<0.5?1:-1)
+				*(MIN_VICTIM_SPEED+Math.random()*(MAX_VICTIM_SPEED-MIN_VICTIM_SPEED))
+			)
+		));
 	}
 }

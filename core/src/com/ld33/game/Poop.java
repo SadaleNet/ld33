@@ -7,7 +7,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 public class Poop extends GameObject {
 	final int POOP_VEL = -200;
 	final int POOP_ACCEL = -300;
-	final int FALL_OUT_BOUNDARY = -200;
+	final int FALL_OUT_BOUNDARY = -0;
 	double deltaTime;
 	public final PooledEffect effect;
 	Poop(float x, float y){
@@ -23,7 +23,9 @@ public class Poop extends GameObject {
 	protected void onStepHook(double deltaTime, int mouseX, int mouseY){
 		this.deltaTime = deltaTime;
 		effect.setPosition(x, y);
-		if(y<FALL_OUT_BOUNDARY)
+		if(y<FALL_OUT_BOUNDARY){
 			LD33Game.instance.objectList.remove(this);
+			effect.setDuration(0);
+		}
 	}
 }
