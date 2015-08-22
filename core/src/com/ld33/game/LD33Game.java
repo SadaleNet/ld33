@@ -28,7 +28,7 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 public class LD33Game extends ApplicationAdapter {
 	SpriteBatch batch;
 	ShapeRenderer shapeRenderer;
-	Texture img;
+	Texture background;
 	BitmapFont bitmapFont;
 	Vector<GameObject> objectList;
 	private Texture sprite;
@@ -105,7 +105,7 @@ public class LD33Game extends ApplicationAdapter {
 		shapeRenderer = new ShapeRenderer();
 		winScene = new Texture("win.png");
 		loseScene = new Texture("lose.png");
-		//img = new Texture("badlogic.jpg");
+		background = new Texture("background.png");
 		bitmapFont = new BitmapFont(Gdx.files.internal("font.fnt"));
 		attackButton = new Button(32, GAME_HEIGHT-32-32, 0, new int[]{3, 10, 50}, new Action(){
 			@Override
@@ -282,6 +282,7 @@ public class LD33Game extends ApplicationAdapter {
 		batch.setProjectionMatrix(camera.combined);
 		shapeRenderer.setProjectionMatrix(camera.combined);
 		batch.begin();
+		batch.draw(background, 0, 0);
 
 		//rendering particles
 		for (int i = effects.size - 1; i >= 0; i--) {
