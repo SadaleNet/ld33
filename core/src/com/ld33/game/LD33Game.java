@@ -178,7 +178,7 @@ public class LD33Game extends ApplicationAdapter {
 					b = c;
 				}
 				if(a instanceof Poop && b instanceof Victim){
-					if(new Rectangle(b.x-b.w/2, b.y-b.h/2, b.w, b.h/2).contains(a.x, b.y)){
+					if(new Rectangle(b.x-b.w/2, b.y, b.w, b.h).contains(a.x, a.y)){
 						((Victim)b).hit(damage);
 						((Poop)a).effect.setDuration(0);
 						objectList.remove(a);
