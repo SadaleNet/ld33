@@ -18,6 +18,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
@@ -48,6 +49,8 @@ public class LD33Game extends ApplicationAdapter {
 	int moneyDelta = 1;
 	long nextVictimSpawnTick;
 	long nextBlackCloudSpawnTick = Long.MIN_VALUE;
+	long centerTextDisappearTick = Long.MAX_VALUE; //Long.MAX_VALUE means click to disappear
+	String centerText = "Poopie the Flying Monster\n\n Click to Play";
 
 	public static final int GAME_WIDTH = 960;
 	public static final int GAME_HEIGHT = 500;
@@ -56,6 +59,7 @@ public class LD33Game extends ApplicationAdapter {
 	private static final float AVERAGE_BLACK_CLOUD_SPAWN_DURATION = 10000;
 	private static final float MIN_CLOUD_SPEED = 25f;
 	private static final float MAX_CLOUD_SPEED = 200f;
+	private static final long TEXT_FADEOUT_DURATION = 1000;
 	
 	public static LD33Game instance;
 
@@ -151,6 +155,8 @@ public class LD33Game extends ApplicationAdapter {
 
 		//Do click handling
 		if(Gdx.input.justTouched()){
+			if(centerTextDisappearTick==Long.MAX_VALUE)
+				centerTextDisappearTick = TimeUtils.millis();
 			boolean handled = false;
 			for(GameObject i:objectList){
 				if(i instanceof Button){
@@ -228,9 +234,17 @@ public class LD33Game extends ApplicationAdapter {
 		for(GameObject i:objectList)
 			i.render(batch, sprite);
 
-		//render money
+		//render money string
 		bitmapFont.getData().setScale(1f);
 	    LD33Game.instance.bitmapFont.draw(batch, "$"+Integer.toString(money), 0, GAME_HEIGHT);
+	    //render menu string
+	    if(TimeUtils.millis()-TEXT_FADEOUT_DURATION<centerTextDisappearTick){
+	    	if(TimeUtils.millis()>centerTextDisappearTick)
+	    		LD33Game.instance.bitmapFont.setColor(1, 1, 1, 1f-(float)(TimeUtils.millis()-centerTextDisappearTick)/TEXT_FADEOUT_DURATION);
+	    	LD33Game.instance.bitmapFont.draw(batch, "Poopie the Flying Monster\n\n Click to Play",
+	    			0, 400, GAME_WIDTH, Align.center, false);
+	    	LD33Game.instance.bitmapFont.setColor(1, 1, 1, 1);
+	    }
 		batch.end();
 
 		//render HP bar
