@@ -17,7 +17,8 @@ public class Boss extends Victim {
 	public void hit(float damage){
 		super.hit(damage);
 		if(hp<=0){
-			//TODO: do the win logic
+			LD33Game.instance.currentScene = LD33Game.instance.winScene;
+			LD33Game.instance.endGameTick = TimeUtils.millis();
 		}
 	}
 

@@ -4,6 +4,7 @@ import java.util.Vector;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
@@ -29,28 +30,33 @@ public class LD33Game extends ApplicationAdapter {
 	ShapeRenderer shapeRenderer;
 	Texture img;
 	BitmapFont bitmapFont;
-	Vector<GameObject> objectList = new Vector<GameObject>();
+	Vector<GameObject> objectList;
 	private Texture sprite;
+	Texture winScene, loseScene, currentScene;
 	private Viewport viewport;
 	private Camera camera;
 
-	private Bird bird;
-	Boss boss = null;
+	Bird bird;
+	Boss boss;
+	PoliceCar policeCar;
 	ParticleEffectPool poopEffectPool;
 	ParticleEffectPool poopedEffectPool;
-	Array<PooledEffect> effects = new Array();
-	
+	Array<PooledEffect> effects;
+
 	Button attackButton, rateButton, flySpeedButton, spawnRateButton, moneyButton;
 
-	int money = 0;
-	float damage = 1f;
-	int averageSpawnDuration = 10000;
-	float bossSpawnProbability = 0.25f;
-	int moneyDelta = 1;
+	int money ;
+	float damage;
+	int averageSpawnDuration;
+	float bossSpawnProbability;
+	int moneyDelta;
 	long nextVictimSpawnTick;
-	long nextBlackCloudSpawnTick = Long.MIN_VALUE;
-	long centerTextDisappearTick = Long.MAX_VALUE; //Long.MAX_VALUE means click to disappear
-	String centerText = "Poopie the Flying Monster\n\n Click to Play";
+	long nextBlackCloudSpawnTick;
+	long centerTextDisappearTick; //Long.MAX_VALUE means click to disappear
+	boolean policeWarningTriggered;
+	long nextPoliceSpawnTick;
+	private String centerTextString;
+	long endGameTick;
 
 	public static final int GAME_WIDTH = 960;
 	public static final int GAME_HEIGHT = 500;
@@ -59,13 +65,35 @@ public class LD33Game extends ApplicationAdapter {
 	private static final float AVERAGE_BLACK_CLOUD_SPAWN_DURATION = 10000;
 	private static final float MIN_CLOUD_SPEED = 25f;
 	private static final float MAX_CLOUD_SPEED = 200f;
+	private static final float AVERAGE_POLICE_SPAWN_DURATION = 100000;
+	private static final float MIN_POLICE_SPEED = 100f;
+	private static final float MAX_POLICE_SPEED = 250f;
+	private static final float POLICE_WARNING_OFFSET = 5000;
 	private static final long TEXT_FADEOUT_DURATION = 1000;
+	private static final long GAME_END_SCENE_CROSSFACE_DURATION = 5000;
 	
 	public static LD33Game instance;
 
 	@Override
 	public void create () {
 		instance = this;
+		objectList = new Vector<GameObject>();
+		money = 0;
+		damage = 1f;
+		averageSpawnDuration = 10000;
+		bossSpawnProbability = 0.25f;
+		moneyDelta = 1;
+		nextBlackCloudSpawnTick = Long.MIN_VALUE;
+		centerTextDisappearTick = Long.MAX_VALUE;
+		policeWarningTriggered = false;
+		nextPoliceSpawnTick = Long.MIN_VALUE;
+		centerTextString = "Poopie the Flying Monster\n\n Click to Play";
+		endGameTick = Long.MAX_VALUE;
+		currentScene=null;
+		boss = null;
+		policeCar = null;
+		effects = new Array<PooledEffect>();
+
 	    camera = new OrthographicCamera(GAME_WIDTH, GAME_HEIGHT);
 	    camera.position.set(GAME_WIDTH/2, GAME_HEIGHT/2, 0);
 	    camera.update();
@@ -73,6 +101,8 @@ public class LD33Game extends ApplicationAdapter {
 	    sprite = new Texture("sprite.png");
 		batch = new SpriteBatch();
 		shapeRenderer = new ShapeRenderer();
+		winScene = new Texture("win.png");
+		loseScene = new Texture("lose.png");
 		//img = new Texture("badlogic.jpg");
 		bitmapFont = new BitmapFont(Gdx.files.internal("font.fnt"));
 		attackButton = new Button(32, GAME_HEIGHT-32-32, 0, new int[]{3, 10, 50}, new Action(){
@@ -154,63 +184,90 @@ public class LD33Game extends ApplicationAdapter {
 		Vector<GameObject> objectListClone = new Vector<GameObject>(objectList);
 
 		//Do click handling
-		if(Gdx.input.justTouched()){
-			if(centerTextDisappearTick==Long.MAX_VALUE)
-				centerTextDisappearTick = TimeUtils.millis();
-			boolean handled = false;
-			for(GameObject i:objectList){
-				if(i instanceof Button){
-					if(new Rectangle(i.x-i.w/2, i.y-i.h/2, i.w, i.h).contains(touchPos.x, touchPos.y)){
-						((Button)i).action();
-						handled = true;
-						break;
+		if(currentScene==null){
+			if(Gdx.input.justTouched()){
+				if(policeCar!=null){
+					centerTextString = "Oh... Police found you being a monster...";
+					policeCar.activate();
+				}
+				if(nextPoliceSpawnTick==Long.MIN_VALUE)
+					spawnPoliceCar();
+				if(centerTextDisappearTick==Long.MAX_VALUE)
+					centerTextDisappearTick = TimeUtils.millis();
+				boolean handled = false;
+				for(GameObject i:objectList){
+					if(i instanceof Button){
+						if(new Rectangle(i.x-i.w/2, i.y-i.h/2, i.w, i.h).contains(touchPos.x, touchPos.y)){
+							((Button)i).action();
+							handled = true;
+							break;
+						}
+					}
+				}
+				if(!handled)
+					bird.poop();
+			}
+			
+			//spawn items
+			if(TimeUtils.millis()>nextVictimSpawnTick)
+				spawnVictim();
+			if(TimeUtils.millis()>nextBlackCloudSpawnTick)
+				spawnBlackCloud();
+			if(!policeWarningTriggered&&nextPoliceSpawnTick!=Long.MIN_VALUE&&TimeUtils.millis()+POLICE_WARNING_OFFSET>nextPoliceSpawnTick){
+				policeWarningTriggered = true;
+				centerTextString = "POLICE!\nSTOP POOPING!";
+				LD33Game.instance.centerTextDisappearTick = Long.MAX_VALUE-1;
+				//TODO: play warning music here
+			}
+			if(TimeUtils.millis()>nextPoliceSpawnTick)
+				spawnPoliceCar();
+	
+			//update the objects
+			for(GameObject i:objectListClone)
+				i.onStep(deltaTime, (int)touchPos.x, (int)touchPos.y);
+	
+			//collision detection
+			for(int i=0; i<objectListClone.size(); i++){
+				for(int j=i+1; j<objectListClone.size(); j++){
+					GameObject a = objectListClone.get(i);
+					GameObject b = objectListClone.get(j);
+					if(b instanceof Poop && a instanceof Victim
+						||b instanceof Bird && a instanceof Thunder
+						||b instanceof Bird && a instanceof PoliceCar){
+						GameObject c = a;
+						a = b;
+						b = c;
+					}
+					if(a instanceof Poop && b instanceof Victim){
+						if(((Victim)b).hp<=0)
+							continue;
+						if(new Rectangle(b.x-b.w/2, b.y-b.h/2, b.w, b.h).contains(a.x, a.y)){
+							((Victim)b).hit(damage);
+							((Poop)a).effect.setDuration(0);
+							objectList.remove(a);
+						}
+					}else if(a instanceof Bird && b instanceof Thunder){
+						if(new Rectangle(a.x-a.w/2, a.y-a.h/2, a.w, a.h)
+							.overlaps(new Rectangle(b.x-b.w/2, b.y-b.h/2, b.w, b.h))){
+							objectList.remove(b);
+							if(money<=1)
+								money = 0;
+							else
+								money /= 2;
+							//TODO: show money lost eyes candy
+						}
+					}else if(a instanceof Bird && b instanceof PoliceCar){
+						if(Math.sqrt((b.x-a.x)*(b.x-a.x)+(b.y-a.y)*(b.y-a.y))<=64){
+							currentScene = loseScene;
+							endGameTick = TimeUtils.millis();
+						}
 					}
 				}
 			}
-			if(!handled)
-				bird.poop();
-		}
-		
-		//spawn items
-		if(TimeUtils.millis()>nextVictimSpawnTick)
-			spawnVictim();
-		if(TimeUtils.millis()>nextBlackCloudSpawnTick)
-			spawnBlackCloud();
-
-		//update the objects
-		for(GameObject i:objectListClone)
-			i.onStep(deltaTime, (int)touchPos.x, (int)touchPos.y);
-
-		//collision detection
-		for(int i=0; i<objectListClone.size(); i++){
-			for(int j=i+1; j<objectListClone.size(); j++){
-				GameObject a = objectListClone.get(i);
-				GameObject b = objectListClone.get(j);
-				if(b instanceof Poop && a instanceof Victim
-					||b instanceof Bird && a instanceof Thunder){
-					GameObject c = a;
-					a = b;
-					b = c;
-				}
-				if(a instanceof Poop && b instanceof Victim){
-					if(((Victim)b).hp<=0)
-						continue;
-					if(new Rectangle(b.x-b.w/2, b.y-b.h/2, b.w, b.h).contains(a.x, a.y)){
-						((Victim)b).hit(damage);
-						((Poop)a).effect.setDuration(0);
-						objectList.remove(a);
-					}
-				}else if(a instanceof Bird && b instanceof Thunder){
-					if(new Rectangle(a.x-a.w/2, a.y-a.h/2, a.w, a.h)
-						.overlaps(new Rectangle(b.x-b.w/2, b.y-b.h/2, b.w, b.h))){
-						objectList.remove(b);
-						if(money<=1)
-							money = 0;
-						else
-							money /= 2;
-						//TODO: show money lost eyes candy
-					}
-				}
+		}else{
+			if(Gdx.input.isKeyJustPressed(Keys.ESCAPE)){
+				create(); //restart the game
+				return;
 			}
 		}
 
@@ -241,7 +298,7 @@ public class LD33Game extends ApplicationAdapter {
 	    if(TimeUtils.millis()-TEXT_FADEOUT_DURATION<centerTextDisappearTick){
 	    	if(TimeUtils.millis()>centerTextDisappearTick)
 	    		LD33Game.instance.bitmapFont.setColor(1, 1, 1, 1f-(float)(TimeUtils.millis()-centerTextDisappearTick)/TEXT_FADEOUT_DURATION);
-	    	LD33Game.instance.bitmapFont.draw(batch, "Poopie the Flying Monster\n\n Click to Play",
+	    	LD33Game.instance.bitmapFont.draw(batch, centerTextString,
 	    			0, 400, GAME_WIDTH, Align.center, false);
 	    	LD33Game.instance.bitmapFont.setColor(1, 1, 1, 1);
 	    }
@@ -263,6 +320,13 @@ public class LD33Game extends ApplicationAdapter {
 			}
 		}
 		shapeRenderer.end();
+
+		if(currentScene!=null){
+			batch.setColor(1, 1, 1, (float)Math.min(1, (double)(TimeUtils.millis()-endGameTick)/(double)GAME_END_SCENE_CROSSFACE_DURATION));
+			batch.begin();
+			batch.draw(currentScene, 0, 0);
+			batch.end();
+		}
 	}
 
 	@Override
@@ -288,7 +352,7 @@ public class LD33Game extends ApplicationAdapter {
 			));
 		}
 	}
-	
+
 	private void spawnBlackCloud(){
 		if(nextBlackCloudSpawnTick!=Long.MIN_VALUE){
 			objectList.add(new BlackCloud(
@@ -299,5 +363,21 @@ public class LD33Game extends ApplicationAdapter {
 			));
 		}
 		nextBlackCloudSpawnTick = TimeUtils.millis()+(long)(AVERAGE_BLACK_CLOUD_SPAWN_DURATION/2+Math.random()*AVERAGE_BLACK_CLOUD_SPAWN_DURATION);
+	}
+
+	private void spawnPoliceCar(){
+		if(nextPoliceSpawnTick!=Long.MIN_VALUE){
+			objectList.add(policeCar=new PoliceCar(
+				(float)(
+					(Math.random()<0.5?1:-1)
+					*(MIN_POLICE_SPEED+Math.random()*(MAX_POLICE_SPEED-MIN_POLICE_SPEED))
+				)
+			));
+		}
+		nextPoliceSpawnTick = TimeUtils.millis()+(long)(AVERAGE_POLICE_SPAWN_DURATION/2+Math.random()*AVERAGE_POLICE_SPAWN_DURATION);
+	}
+	
+	private void setScreen(){
+		
 	}
 }
