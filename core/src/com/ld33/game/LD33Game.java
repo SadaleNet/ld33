@@ -37,8 +37,10 @@ public class LD33Game extends ApplicationAdapter {
 	ParticleEffectPool poopEffectPool;
 	ParticleEffectPool poopedEffectPool;
 	Array<PooledEffect> effects = new Array();
+	
+	Button attackButton, rateButton, flySpeedButton, spawnRateButton, moneyButton;
 
-	float money = 0f;
+	int money = 0;
 	float damage = 1f;
 	int averageSpawnDuration = 10000;
 	long nextVictimSpawnTick;
@@ -62,6 +64,18 @@ public class LD33Game extends ApplicationAdapter {
 		shapeRenderer = new ShapeRenderer();
 		//img = new Texture("badlogic.jpg");
 		bitmapFont = new BitmapFont(Gdx.files.internal("font.fnt"));
+		bitmapFont.getData().setScale(0.5f);
+		attackButton = new Button(32, GAME_HEIGHT-32-32, 0, new int[]{1, 10, 50}, new Action(){
+			@Override
+			void action(int level) {
+				switch(level){
+					case 1:	damage = 2; break;
+					case 2:	damage = 3; break;
+					case 3:	damage = 10; break;				
+				}
+			}
+		});
+		objectList.add(attackButton);
 
 		ParticleEffect poopEffect = new ParticleEffect();
 		poopEffect.load(Gdx.files.internal("poopDrop.p"), Gdx.files.internal(""));
@@ -72,7 +86,7 @@ public class LD33Game extends ApplicationAdapter {
 		poopedEffectPool = new ParticleEffectPool(poopedEffect, 16, 1024);
 
 		objectList.add(bird=new Bird(GAME_WIDTH/2, GAME_HEIGHT/2));
-		
+
 		spawnVictim();
 	}
 
@@ -86,7 +100,18 @@ public class LD33Game extends ApplicationAdapter {
 
 		//Do click handling
 		if(Gdx.input.justTouched()){
-			bird.poop();
+			boolean handled = false;
+			for(GameObject i:objectList){
+				if(i instanceof Button){
+					if(new Rectangle(i.x-i.w/2, i.y-i.h/2, i.w, i.h).contains(touchPos.x, touchPos.y)){
+						((Button)i).action();
+						handled = true;
+						break;
+					}
+				}
+			}
+			if(!handled)
+				bird.poop();
 		}
 		
 		//spawn items
@@ -108,7 +133,7 @@ public class LD33Game extends ApplicationAdapter {
 					b = c;
 				}
 				if(a instanceof Poop && b instanceof Victim){
-					if(new Rectangle(b.x, b.y, b.w, b.h).contains(a.x, b.y)){
+					if(new Rectangle(b.x-b.w/2, b.y-b.h/2, b.w, b.h/2).contains(a.x, b.y)){
 						((Victim)b).hit(damage);
 						((Poop)a).effect.setDuration(0);
 						objectList.remove(a);
@@ -123,7 +148,6 @@ public class LD33Game extends ApplicationAdapter {
 		batch.setProjectionMatrix(camera.combined);
 		shapeRenderer.setProjectionMatrix(camera.combined);
 		batch.begin();
-		//bitmapFont.draw(batch, "meow", 200, 200);
 
 		//rendering particles
 		for (int i = effects.size - 1; i >= 0; i--) {
@@ -137,6 +161,7 @@ public class LD33Game extends ApplicationAdapter {
 		//render sprite
 		for(GameObject i:objectList)
 			i.render(batch, sprite);
+	    LD33Game.instance.bitmapFont.draw(batch, "$"+Integer.toString(money), 0, GAME_HEIGHT-16);
 		batch.end();
 
 		//render HP bar

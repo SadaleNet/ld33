@@ -12,7 +12,7 @@ public class Bird extends GameObject {
 	final int POOP_EMIT_OFFSET_Y = 32;
 	final int BOTTOM_BOUND = 250;
 	final int TOP_BOUND = LD33Game.GAME_HEIGHT-64;
-	final int LEFT_BOUND = 64;
+	final int LEFT_BOUND = 64+32;
 	final int RIGHT_BOUND = LD33Game.GAME_WIDTH-64;
 
 	//states
@@ -31,6 +31,8 @@ public class Bird extends GameObject {
 		if(Math.sqrt((mouseX-x)*(mouseX-x)+(mouseY-y)*(mouseY-y))<=STOP_MOVEMENT_DISTANCE
 			||x<LEFT_BOUND||x>RIGHT_BOUND
 			||y<BOTTOM_BOUND||y>TOP_BOUND){
+			xVel = 0;
+			yVel = 0;
 			x = Math.max(LEFT_BOUND, Math.min(x, RIGHT_BOUND));
 			y = Math.max(BOTTOM_BOUND, Math.min(y, TOP_BOUND));
 		}else{

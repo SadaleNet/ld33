@@ -34,7 +34,7 @@ public class Victim extends GameObject {
 				effect.setDuration(0);
 		}
 		if(effect!=null)
-			effect.setPosition(x, y+32);
+			effect.setPosition(x, y);
 	}
 	@Override
 	public void render(SpriteBatch batch, Texture sprite){
@@ -50,6 +50,8 @@ public class Victim extends GameObject {
 			effect = LD33Game.instance.poopEffectPool.obtain();
 			effect.setPosition(x, y);
 			LD33Game.instance.effects.add(effect);
+			LD33Game.instance.money++;
+			//TODO: create eyes candy for getting money
 		}
 	}
 }
