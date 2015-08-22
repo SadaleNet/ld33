@@ -22,6 +22,6 @@ public class Boss extends Victim {
 	}
 
 	public float getFullHp() {
-		return 1500; //The max damage dealt on the victim is about 1800
+		return 400; //The max damage dealt on the victim is about 1800
 	}
 }
