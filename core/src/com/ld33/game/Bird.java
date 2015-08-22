@@ -8,6 +8,7 @@ public class Bird extends GameObject {
 	final int GRAPHIC_INTERVAL = 50; //how long does it take to change a frame
 	final int STOP_MOVEMENT_DISTANCE = 20;
 	public float speed = 100f;
+	private boolean spriteFlip = false;
 	Bird(float x, float y){
 		this.x = x; this.y = y;
 		w = 64; h = 64;
@@ -21,12 +22,13 @@ public class Bird extends GameObject {
 			double angle = Math.atan2(mouseY-y, mouseX-x);
 			xVel = (float) (speed*Math.cos(angle));
 			yVel = (float) (speed*Math.sin(angle));
+			spriteFlip = (xVel<0);
 		}
 	}
 	@Override
 	public void render(SpriteBatch batch, Texture sprite){
 		batch.draw(sprite, x-w/2, y-h/2, w, h,
 			(int)(((TimeUtils.millis()-spawnTime)/GRAPHIC_INTERVAL)%8)*64,
-			0*64, 64, 64, false, false);
+			0*64, 64, 64, spriteFlip, false);
 	}
 }
