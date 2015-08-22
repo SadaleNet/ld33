@@ -47,11 +47,15 @@ public class LD33Game extends ApplicationAdapter {
 	float bossSpawnProbability = 0.25f;
 	int moneyDelta = 1;
 	long nextVictimSpawnTick;
+	long nextBlackCloudSpawnTick = Long.MIN_VALUE;
 
 	public static final int GAME_WIDTH = 960;
 	public static final int GAME_HEIGHT = 500;
 	private static final float MIN_VICTIM_SPEED = 50f;
 	private static final float MAX_VICTIM_SPEED = 100f;
+	private static final float AVERAGE_BLACK_CLOUD_SPAWN_DURATION = 10000;
+	private static final float MIN_CLOUD_SPEED = 25f;
+	private static final float MAX_CLOUD_SPEED = 200f;
 	
 	public static LD33Game instance;
 
@@ -134,6 +138,7 @@ public class LD33Game extends ApplicationAdapter {
 		objectList.add(bird=new Bird(GAME_WIDTH/2, GAME_HEIGHT/2));
 
 		spawnVictim();
+		spawnBlackCloud();
 	}
 
 	@Override
@@ -163,6 +168,8 @@ public class LD33Game extends ApplicationAdapter {
 		//spawn items
 		if(TimeUtils.millis()>nextVictimSpawnTick)
 			spawnVictim();
+		if(TimeUtils.millis()>nextBlackCloudSpawnTick)
+			spawnBlackCloud();
 
 		//update the objects
 		for(GameObject i:objectListClone)
@@ -173,7 +180,8 @@ public class LD33Game extends ApplicationAdapter {
 			for(int j=i+1; j<objectListClone.size(); j++){
 				GameObject a = objectListClone.get(i);
 				GameObject b = objectListClone.get(j);
-				if(b instanceof Poop && a instanceof Victim){
+				if(b instanceof Poop && a instanceof Victim
+					||b instanceof Bird && a instanceof Thunder){
 					GameObject c = a;
 					a = b;
 					b = c;
@@ -181,10 +189,20 @@ public class LD33Game extends ApplicationAdapter {
 				if(a instanceof Poop && b instanceof Victim){
 					if(((Victim)b).hp<=0)
 						continue;
-					if(new Rectangle(b.x-b.w/2, b.y, b.w, b.h).contains(a.x, a.y)){
+					if(new Rectangle(b.x-b.w/2, b.y-b.h/2, b.w, b.h).contains(a.x, a.y)){
 						((Victim)b).hit(damage);
 						((Poop)a).effect.setDuration(0);
 						objectList.remove(a);
+					}
+				}else if(a instanceof Bird && b instanceof Thunder){
+					if(new Rectangle(a.x-a.w/2, a.y-a.h/2, a.w, a.h)
+						.overlaps(new Rectangle(b.x-b.w/2, b.y-b.h/2, b.w, b.h))){
+						objectList.remove(b);
+						if(money<=1)
+							money = 0;
+						else
+							money /= 2;
+						//TODO: show money lost eyes candy
 					}
 				}
 			}
@@ -255,5 +273,17 @@ public class LD33Game extends ApplicationAdapter {
 				)
 			));
 		}
+	}
+	
+	private void spawnBlackCloud(){
+		if(nextBlackCloudSpawnTick!=Long.MIN_VALUE){
+			objectList.add(new BlackCloud(
+				(float)(
+					(Math.random()<0.5?1:-1)
+					*(MIN_CLOUD_SPEED+Math.random()*(MAX_CLOUD_SPEED-MIN_CLOUD_SPEED))
+				)
+			));
+		}
+		nextBlackCloudSpawnTick = TimeUtils.millis()+(long)(AVERAGE_BLACK_CLOUD_SPAWN_DURATION/2+Math.random()*AVERAGE_BLACK_CLOUD_SPAWN_DURATION);
 	}
 }

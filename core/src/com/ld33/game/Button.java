@@ -41,7 +41,7 @@ public class Button extends GameObject {
 	@Override
 	public void render(SpriteBatch batch, Texture sprite){
 		if(!hover)
-			batch.setColor(0f, 0f, 0f, 1);
+			batch.setColor(0.5f, 0.5f, 0.5f, 1);
 		batch.draw(sprite, x-w/2, y-h/2, w, h,
 			spriteIndex*64,
 			5*64, 64, 64, false, false);
