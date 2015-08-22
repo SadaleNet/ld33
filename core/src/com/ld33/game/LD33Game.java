@@ -189,10 +189,6 @@ public class LD33Game extends ApplicationAdapter {
 		//Do click handling
 		if(currentScene==null){
 			if(Gdx.input.justTouched()){
-				if(policeCar!=null){
-					centerTextString = "Oh... Police found you being a monster...";
-					policeCar.activate();
-				}
 				if(nextPoliceSpawnTick==Long.MIN_VALUE)
 					spawnPoliceCar();
 				if(centerTextDisappearTick==Long.MAX_VALUE)
@@ -207,8 +203,13 @@ public class LD33Game extends ApplicationAdapter {
 						}
 					}
 				}
-				if(!handled)
+				if(!handled){
 					bird.poop();
+					if(policeCar!=null){
+						centerTextString = "Oh... Police found you being a monster...";
+						policeCar.activate();
+					}
+				}
 			}
 			
 			//spawn items
