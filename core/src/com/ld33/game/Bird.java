@@ -50,7 +50,7 @@ public class Bird extends GameObject {
 	}
 	public void poop() {
 		if(TimeUtils.millis()-lastPoopReloadTick>poopReloadDuration){
-			LD33Game.instance.objectList.add(new Poop(spriteFlip?x-POOP_EMIT_OFFSET_X:x+POOP_EMIT_OFFSET_X, y-POOP_EMIT_OFFSET_Y));
+			LD33Game.instance.objectList.add(new Poop(spriteFlip?x+POOP_EMIT_OFFSET_X:x-POOP_EMIT_OFFSET_X, y-POOP_EMIT_OFFSET_Y));
 			lastPoopReloadTick = TimeUtils.millis();
 		}
 	}
