@@ -95,7 +95,7 @@ public class LD33Game extends ApplicationAdapter {
 				switch(level){
 					case 1:	bird.speed = 150f; break;
 					case 2:	bird.speed = 200f; break;
-					case 3:	bird.speed = 1000f; break;				
+					case 3:	bird.speed = 300f; break;				
 				}
 			}
 		});
