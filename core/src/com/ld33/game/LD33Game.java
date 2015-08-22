@@ -52,6 +52,7 @@ public class LD33Game extends ApplicationAdapter {
 	int moneyDelta;
 	long nextVictimSpawnTick;
 	long nextBlackCloudSpawnTick;
+	long nextWhiteCloudSpawnTick;
 	long centerTextDisappearTick; //Long.MAX_VALUE means click to disappear
 	boolean policeWarningTriggered;
 	long nextPoliceSpawnTick;
@@ -62,6 +63,7 @@ public class LD33Game extends ApplicationAdapter {
 	public static final int GAME_HEIGHT = 500;
 	private static final float MIN_VICTIM_SPEED = 50f;
 	private static final float MAX_VICTIM_SPEED = 100f;
+	private static final float AVERAGE_WHITE_CLOUD_SPAWN_DURATION = 2500;
 	private static final float AVERAGE_BLACK_CLOUD_SPAWN_DURATION = 10000;
 	private static final float MIN_CLOUD_SPEED = 25f;
 	private static final float MAX_CLOUD_SPEED = 200f;
@@ -173,6 +175,7 @@ public class LD33Game extends ApplicationAdapter {
 
 		spawnVictim();
 		spawnBlackCloud();
+		spawnWhiteCloud();
 	}
 
 	@Override
@@ -213,6 +216,8 @@ public class LD33Game extends ApplicationAdapter {
 				spawnVictim();
 			if(TimeUtils.millis()>nextBlackCloudSpawnTick)
 				spawnBlackCloud();
+			if(TimeUtils.millis()>nextWhiteCloudSpawnTick)
+				spawnWhiteCloud();
 			if(!policeWarningTriggered&&nextPoliceSpawnTick!=Long.MIN_VALUE&&TimeUtils.millis()+POLICE_WARNING_OFFSET>nextPoliceSpawnTick){
 				policeWarningTriggered = true;
 				centerTextString = "POLICE!\nSTOP POOPING!";
@@ -353,6 +358,18 @@ public class LD33Game extends ApplicationAdapter {
 		}
 	}
 
+	private void spawnWhiteCloud(){
+		if(nextWhiteCloudSpawnTick!=Long.MIN_VALUE){
+			objectList.add(new Cloud(
+				(float)(
+					(Math.random()<0.5?1:-1)
+					*(MIN_CLOUD_SPEED+Math.random()*(MAX_CLOUD_SPEED-MIN_CLOUD_SPEED))
+				)
+			));
+		}
+		nextWhiteCloudSpawnTick = TimeUtils.millis()+(long)(AVERAGE_WHITE_CLOUD_SPAWN_DURATION/2+Math.random()*AVERAGE_WHITE_CLOUD_SPAWN_DURATION);
+	}
+
 	private void spawnBlackCloud(){
 		if(nextBlackCloudSpawnTick!=Long.MIN_VALUE){
 			objectList.add(new BlackCloud(
@@ -375,9 +392,5 @@ public class LD33Game extends ApplicationAdapter {
 			));
 		}
 		nextPoliceSpawnTick = TimeUtils.millis()+(long)(AVERAGE_POLICE_SPAWN_DURATION/2+Math.random()*AVERAGE_POLICE_SPAWN_DURATION);
-	}
-	
-	private void setScreen(){
-		
 	}
 }
