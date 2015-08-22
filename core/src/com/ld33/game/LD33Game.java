@@ -259,7 +259,7 @@ public class LD33Game extends ApplicationAdapter {
 								money = 0;
 							else
 								money /= 2;
-							//TODO: show money lost eyes candy
+							objectList.add(new MoneyEyesCandy(a.x, a.y-32, -50f));
 						}
 					}else if(a instanceof Bird && b instanceof PoliceCar){
 						if(Math.sqrt((b.x-a.x)*(b.x-a.x)+(b.y-a.y)*(b.y-a.y))<=64){

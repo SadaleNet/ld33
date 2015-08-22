@@ -54,7 +54,7 @@ public class Victim extends GameObject {
 			effect.setPosition(x, y);
 			LD33Game.instance.effects.add(effect);
 			LD33Game.instance.money += LD33Game.instance.moneyDelta;
-			//TODO: create eyes candy for getting money
+			LD33Game.instance.objectList.add(new MoneyEyesCandy(x, y+64, 50f));
 		}
 	}
 
