@@ -316,12 +316,13 @@ public class LD33Game extends ApplicationAdapter {
 			if(i instanceof Victim){
 				if(((Victim)i).hp==((Victim)i).getFullHp())
 					continue;
+				float yOffset = i instanceof Boss?100:80;
 				shapeRenderer.setColor(Color.RED);
-				shapeRenderer.rect(i.x-i.w/2, i.y+80, i.w, 10);
+				shapeRenderer.rect(i.x-i.w/2, i.y+yOffset, i.w, 10);
 
 				if(((Victim)i).hp>0){
 					shapeRenderer.setColor(Color.GREEN);
-					shapeRenderer.rect(i.x-i.w/2, i.y+80, i.w*((Victim)i).hp/((Victim)i).getFullHp(), 10);
+					shapeRenderer.rect(i.x-i.w/2, i.y+yOffset, i.w*((Victim)i).hp/((Victim)i).getFullHp(), 10);
 				}
 			}
 		}
