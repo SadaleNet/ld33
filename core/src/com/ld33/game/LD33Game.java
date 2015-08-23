@@ -70,7 +70,7 @@ public class LD33Game extends ApplicationAdapter {
 	private static final float AVERAGE_POLICE_SPAWN_DURATION = 100000;
 	private static final float MIN_POLICE_SPEED = 100f;
 	private static final float MAX_POLICE_SPEED = 250f;
-	private static final long POLICE_WARNING_OFFSET = 5000;
+	private static final long POLICE_WARNING_OFFSET = 3000;
 	private static final long TEXT_FADEOUT_DURATION = 1000;
 	private static final long GAME_END_SCENE_CROSSFACE_DURATION = 2000;
 	
