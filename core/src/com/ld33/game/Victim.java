@@ -7,7 +7,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.TimeUtils;
 
 public class Victim extends GameObject {
-	final int GRAPHIC_INTERVAL = 50; //how long does it take to change a frame
+	final int GRAPHIC_INTERVAL = 75; //how long does it take to change a frame
 	final int LEFT_BOUND = -64/2;
 	final int RIGHT_BOUND = LD33Game.GAME_WIDTH+64/2;
 	protected boolean spriteFlip = false;

@@ -3,6 +3,7 @@ package com.ld33.game;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.utils.Align;
 
 abstract class Action{
 	abstract void action(int level);
@@ -49,11 +50,11 @@ public class Button extends GameObject {
 			batch.setColor(1, 1, 1, 1);
 		LD33Game.instance.bitmapFont.getData().setScale(0.5f);
 		if(level<costTable.length){
-			LD33Game.instance.bitmapFont.draw(batch,
-				Integer.toString(costTable[level]),
-				x+8, y-8);
+			LD33Game.instance.bitmapFont.draw(batch, "$"+Integer.toString(costTable[level]),
+	    			x, y-8, 25, Align.right, false);
 		}else{
-			LD33Game.instance.bitmapFont.draw(batch, "max", x+8, y-8);
+			LD33Game.instance.bitmapFont.draw(batch, "max",
+	    			x, y-8, 25, Align.right, false);
 		}
 	}
 }
