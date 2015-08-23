@@ -118,7 +118,7 @@ public class LD33Game extends ApplicationAdapter {
 			}
 		});
 		objectList.add(attackButton);
-		rateButton = new Button(32, GAME_HEIGHT-32-32-64, 1, new int[]{3, 10, 50}, new Action(){
+		rateButton = new Button(32, GAME_HEIGHT-32-32-64, 1, new int[]{2, 10, 50}, new Action(){
 			@Override
 			void action(int level) {
 				switch(level){
