@@ -32,6 +32,7 @@ public class PoliceCar extends GameObject {
 			LD33Game.instance.centerTextDisappearTick = TimeUtils.millis();
 			LD33Game.instance.policeCar = null;
 			LD33Game.instance.policeWarningTriggered = false;
+			LD33Game.instance.siren.stop();
 		}
 	}
 	protected void activate(){

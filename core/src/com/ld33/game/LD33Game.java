@@ -5,6 +5,7 @@ import java.util.Vector;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
@@ -33,6 +34,7 @@ public class LD33Game extends ApplicationAdapter {
 	Vector<GameObject> objectList;
 	private Texture sprite;
 	Texture winScene, loseScene, currentScene;
+	Music siren;
 	private Viewport viewport;
 	private Camera camera;
 
@@ -107,7 +109,12 @@ public class LD33Game extends ApplicationAdapter {
 		loseScene = new Texture("lose.png");
 		background = new Texture("background.png");
 		bitmapFont = new BitmapFont(Gdx.files.internal("font.fnt"));
-		attackButton = new Button(32, GAME_HEIGHT-32-32, 0, new int[]{3, 10, 50}, new Action(){
+
+
+		siren = Gdx.audio.newMusic(Gdx.files.internal("siren.ogg"));
+		siren.setLooping(true);
+
+		attackButton = new Button(32, GAME_HEIGHT-32-32, 0, new int[]{2, 10, 200}, new Action(){
 			@Override
 			void action(int level) {
 				switch(level){
@@ -118,7 +125,7 @@ public class LD33Game extends ApplicationAdapter {
 			}
 		});
 		objectList.add(attackButton);
-		rateButton = new Button(32, GAME_HEIGHT-32-32-64, 1, new int[]{2, 10, 50}, new Action(){
+		rateButton = new Button(32, GAME_HEIGHT-32-32-64, 1, new int[]{3, 10, 50}, new Action(){
 			@Override
 			void action(int level) {
 				switch(level){
@@ -140,7 +147,7 @@ public class LD33Game extends ApplicationAdapter {
 			}
 		});
 		objectList.add(flySpeedButton);
-		spawnRateButton = new Button(32, GAME_HEIGHT-32-32-64*3, 3, new int[]{10, 50, 200}, new Action(){
+		spawnRateButton = new Button(32, GAME_HEIGHT-32-32-64*3, 3, new int[]{10, 50, 100}, new Action(){
 			@Override
 			void action(int level) {
 				switch(level){
@@ -223,7 +230,7 @@ public class LD33Game extends ApplicationAdapter {
 				policeWarningTriggered = true;
 				centerTextString = "POLICE!\nSTOP POOPING!";
 				LD33Game.instance.centerTextDisappearTick = Long.MAX_VALUE-1;
-				//TODO: play warning music here
+				siren.play();
 			}
 			if(TimeUtils.millis()>nextPoliceSpawnTick)
 				spawnPoliceCar();
@@ -264,6 +271,7 @@ public class LD33Game extends ApplicationAdapter {
 						}
 					}else if(a instanceof Bird && b instanceof PoliceCar){
 						if(Math.sqrt((b.x-a.x)*(b.x-a.x)+(b.y-a.y)*(b.y-a.y))<=64){
+							siren.stop();
 							currentScene = loseScene;
 							endGameTick = TimeUtils.millis();
 						}
