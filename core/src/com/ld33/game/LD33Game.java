@@ -94,7 +94,7 @@ public class LD33Game extends ApplicationAdapter {
 		centerTextDisappearTick = Long.MAX_VALUE;
 		policeWarningTriggered = false;
 		nextPoliceSpawnTick = Long.MIN_VALUE;
-		centerTextString = "Poopie the Flying Monster\n\n Click to Play";
+		centerTextString = "Poopie the Flying Monster\n\n**Click to Play**\n\n\nLudum Dare 33 Entry\nFor entertainment only,\nno political message intended\n(C) 2015 Wong Cho Ching. All rights reserved.";
 		endGameTick = Long.MAX_VALUE;
 		currentScene=null;
 		boss = null;
