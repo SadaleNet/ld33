@@ -19,6 +19,7 @@ public class Boss extends Victim {
 		if(hp<=0){
 			LD33Game.instance.currentScene = LD33Game.instance.winScene;
 			LD33Game.instance.endGameTick = TimeUtils.millis();
+			LD33Game.instance.winSound.play();
 		}
 	}
 

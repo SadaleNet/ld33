@@ -27,8 +27,11 @@ public class Button extends GameObject {
 			return;
 		if(LD33Game.instance.money>=costTable[level]){
 			LD33Game.instance.money -= costTable[level];
+			LD33Game.instance.upgradeSound.play();
 			level++;
 			action.action(level);
+		}else{
+			LD33Game.instance.noUpgradeSound.play();
 		}
 	}
 	@Override

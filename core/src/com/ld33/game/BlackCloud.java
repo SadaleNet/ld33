@@ -24,6 +24,7 @@ public class BlackCloud extends GameObject {
 		if(TimeUtils.millis()>=nextSpawnTick){
 			nextSpawnTick = TimeUtils.millis()+5000+(int)(Math.random()*5000);
 			LD33Game.instance.objectList.add(new Thunder(x, y));
+			LD33Game.instance.thunderSound.play();
 		}
 		if(x<LEFT_BOUND||x>RIGHT_BOUND){
 			LD33Game.instance.objectList.remove(this);

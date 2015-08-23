@@ -6,6 +6,7 @@ import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
@@ -34,6 +35,8 @@ public class LD33Game extends ApplicationAdapter {
 	Vector<GameObject> objectList;
 	private Texture sprite;
 	Texture winScene, loseScene, currentScene;
+	Sound loseSound, winSound, upgradeSound, noUpgradeSound, poopedSound, thunderSound, moneyLossSound;
+	Sound[] poopSounds;
 	Music siren;
 	private Viewport viewport;
 	private Camera camera;
@@ -110,9 +113,19 @@ public class LD33Game extends ApplicationAdapter {
 		background = new Texture("background.png");
 		bitmapFont = new BitmapFont(Gdx.files.internal("font.fnt"));
 
-
 		siren = Gdx.audio.newMusic(Gdx.files.internal("siren.ogg"));
 		siren.setLooping(true);
+		loseSound = Gdx.audio.newSound(Gdx.files.internal("lose.wav"));
+		winSound = Gdx.audio.newSound(Gdx.files.internal("win.wav"));
+		upgradeSound = Gdx.audio.newSound(Gdx.files.internal("upgrade.wav"));
+		noUpgradeSound = Gdx.audio.newSound(Gdx.files.internal("noUpgrade.wav"));
+		poopedSound = Gdx.audio.newSound(Gdx.files.internal("pooped.wav"));
+		thunderSound = Gdx.audio.newSound(Gdx.files.internal("thunder.wav"));
+		moneyLossSound = Gdx.audio.newSound(Gdx.files.internal("moneyLoss.wav")); 
+		poopSounds = new Sound[]{Gdx.audio.newSound(Gdx.files.internal("poop0.wav")),
+			Gdx.audio.newSound(Gdx.files.internal("poop1.wav")),
+			Gdx.audio.newSound(Gdx.files.internal("poop2.wav")),
+			Gdx.audio.newSound(Gdx.files.internal("poop3.wav"))};
 
 		attackButton = new Button(32, GAME_HEIGHT-32-32, 0, new int[]{2, 10, 200}, new Action(){
 			@Override
@@ -267,11 +280,13 @@ public class LD33Game extends ApplicationAdapter {
 								money = 0;
 							else
 								money /= 2;
+							moneyLossSound.play();
 							objectList.add(new MoneyEyesCandy(a.x, a.y-32, -50f));
 						}
 					}else if(a instanceof Bird && b instanceof PoliceCar){
 						if(Math.sqrt((b.x-a.x)*(b.x-a.x)+(b.y-a.y)*(b.y-a.y))<=64){
 							siren.stop();
+							loseSound.play();
 							currentScene = loseScene;
 							endGameTick = TimeUtils.millis();
 						}

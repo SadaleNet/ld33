@@ -55,6 +55,7 @@ public class Victim extends GameObject {
 			LD33Game.instance.effects.add(effect);
 			LD33Game.instance.money += LD33Game.instance.moneyDelta;
 			LD33Game.instance.objectList.add(new MoneyEyesCandy(x, y+64, 50f));
+			LD33Game.instance.poopedSound.play();
 		}
 	}
 
